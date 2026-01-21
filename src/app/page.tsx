@@ -43,6 +43,7 @@ export default function Home() {
   const [videoCurrentTime, setVideoCurrentTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(120);
   const [timelineZoom, setTimelineZoom] = useState(34);
+  const [behaviorFilter, setBehaviorFilter] = useState<string | null>(null);
   const [isBehaviorModalOpen, setIsBehaviorModalOpen] = useState(false);
   const [behaviorModalMode, setBehaviorModalMode] = useState<"add" | "edit">(
     "add"
@@ -1223,7 +1224,11 @@ export default function Home() {
                     onClick={() => setSelectedChildId(String(index))}
                   >
                     <div className={styles.profileImage}>
-                      <div className={styles.profilePortrait} />
+                      <img
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name}&backgroundColor=f5c8a7&radius=12`}
+                        alt={name}
+                        className={styles.profilePortrait}
+                      />
                     </div>
                     <div className={styles.profileName}>{name}</div>
                     <div className={styles.profileMeta}>Age: 8 years</div>
@@ -1240,15 +1245,19 @@ export default function Home() {
               {(() => {
                 const sessionKey = selectedSessionId ?? "0";
                 const reportSubjectName = activeChildName || "Child A";
-                const behaviors: Behavior[] = sessionBehaviorMap[sessionKey] || [];
+                const allBehaviors: Behavior[] = sessionBehaviorMap[sessionKey] || [];
+                const behaviors: Behavior[] = behaviorFilter
+                  ? allBehaviors.filter((item) => item.behavior === behaviorFilter)
+                  : allBehaviors;
                 const sessionVideoMap: Record<string, string> = {
                   "0": "/video_behaviors_labeled.mp4",
                   "1": "/video2_behaviors_labeled.mp4",
                 };
                 const currentVideo =
                   sessionVideoMap[sessionKey] ?? "/video_behaviors_labeled.mp4";
-                const totalBehaviors = behaviors.length;
-                const behaviorCounts = behaviors.reduce<Record<string, number>>(
+                const totalBehaviors = allBehaviors.length;
+                const filteredBehaviors = behaviors.length;
+                const behaviorCounts = allBehaviors.reduce<Record<string, number>>(
                   (acc, item: Behavior) => {
                     acc[item.behavior] = (acc[item.behavior] || 0) + 1;
                     return acc;
@@ -1285,7 +1294,10 @@ export default function Home() {
                     <button
                       className={styles.backLink}
                       type="button"
-                      onClick={() => setSelectedSessionId(null)}
+                      onClick={() => {
+                        setSelectedSessionId(null);
+                        setBehaviorFilter(null);
+                      }}
                     >
                       ← Back
                     </button>
@@ -1299,7 +1311,7 @@ export default function Home() {
                         >
                           Export Report
                         </button>
-                      </div>
+        </div>
                 <div className={styles.sessionPills}>
                   <span className={styles.sessionPill}>
                     {totalBehaviors} Behaviors
@@ -1460,14 +1472,17 @@ export default function Home() {
                   {Object.entries(behaviorCounts).map(([name, count]) => (
                     <button
                       key={name}
-                      className={styles.summaryChip}
+                      className={`${styles.summaryChip} ${
+                        behaviorFilter === name ? styles.summaryChipActive : ""
+                      }`}
                       type="button"
-                      onClick={() =>
-                        handleSeekTo(
-                          behaviors.find((item) => item.behavior === name)
-                            ?.start_timestamp ?? 0
-                        )
-                      }
+                      onClick={() => {
+                        if (behaviorFilter === name) {
+                          setBehaviorFilter(null);
+                        } else {
+                          setBehaviorFilter(name);
+                        }
+                      }}
                     >
                       <span>{String(count).padStart(2, "0")}</span> {name}
                     </button>
@@ -1477,7 +1492,10 @@ export default function Home() {
               <section className={styles.behaviorTable}>
                 <div className={styles.behaviorTableHeader}>
                   <span>
-                    All Behaviors <span className={styles.behaviorCount}>{totalBehaviors} total</span>
+                    {behaviorFilter ? "Filtered Behaviors" : "All Behaviors"}{" "}
+                    <span className={styles.behaviorCount}>
+                      {behaviorFilter ? `${filteredBehaviors} of ${totalBehaviors}` : `${totalBehaviors} total`}
+                    </span>
                   </span>
                   <button
                     className={styles.addBehaviorButton}
@@ -1692,7 +1710,11 @@ export default function Home() {
                 ← All Children
               </button>
               <div className={styles.childSummary}>
-                <div className={styles.childAvatarLarge}>👧</div>
+                <img
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${activeChildName}&backgroundColor=f1e2d6&radius=50`}
+                  alt={activeChildName}
+                  className={styles.childAvatarLarge}
+                />
                 <div>
                   <div className={styles.childOverviewTitle}>
                     {activeChildName} - Overview
@@ -2059,7 +2081,11 @@ export default function Home() {
                 <section className={styles.scheduleWrapper}>
                   <h1 className={styles.addCenterTitle}>Schedule session</h1>
                   <div className={styles.scheduleHeader}>
-                    <div className={styles.childAvatar}>👧</div>
+                    <img
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${children.find((child) => child.id === scheduleChildId)?.name ?? "Child"}&backgroundColor=f1e2d6&radius=50`}
+                      alt={children.find((child) => child.id === scheduleChildId)?.name ?? "Child"}
+                      className={styles.childAvatar}
+                    />
                     <div>
                       <div className={styles.childName}>
                         {children.find((child) => child.id === scheduleChildId)

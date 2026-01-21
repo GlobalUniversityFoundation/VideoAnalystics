@@ -327,6 +327,8 @@
   height: 140px;
   border-radius: 12px;
   background: linear-gradient(180deg, #f5c8a7 0%, #f0b88f 100%);
+  display: block;
+  object-fit: cover;
 }
 
 .profileName {
@@ -369,10 +371,8 @@
   height: 52px;
   border-radius: 50%;
   background: #f1e2d6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+  display: block;
+  object-fit: cover;
 }
 
 .childOverviewTitle {
@@ -745,6 +745,16 @@
   color: #2d5fcc;
   font-weight: 600;
   margin-right: 4px;
+}
+
+.summaryChipActive {
+  background: #eaf2ff;
+  border-color: #2d5fcc;
+  color: #2d5fcc;
+}
+
+.summaryChipActive span {
+  color: #1d4ed8;
 }
 
 .behaviorTable {
@@ -1277,10 +1287,8 @@
   height: 44px;
   border-radius: 50%;
   background: #f1e2d6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
+  display: block;
+  object-fit: cover;
 }
 
 .childName {
